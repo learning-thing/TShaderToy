@@ -2,6 +2,7 @@
 #include <raylib.h>
 #include <string>
 #include <fstream>
+#include <iostream>
 
 class ShaderToyImage {
     public:
@@ -24,6 +25,8 @@ class ShaderToyImage {
                 imgText = LoadTextureFromImage(img);
                 first = false;
             }
+            last.close();
+
         }
 
         ~ShaderToyImage() {
@@ -34,6 +37,7 @@ class ShaderToyImage {
             } else {
                 std::cerr << "Error opening file\n";
             }
+            last.close();
         }
 
         void switchImage() {
@@ -45,7 +49,7 @@ class ShaderToyImage {
                     if (!first) UnloadTexture(imgText);
                     img = LoadImage(imgPath.c_str());
                     aspect = img.height/img.width;
-                    ImageResize(&img, 500*aspect, 500);
+                    //ImageResize(&img, 500, 500*aspect);
                     imgText = LoadTextureFromImage(img);
                     first = false;
                 }
@@ -54,6 +58,6 @@ class ShaderToyImage {
         }
         
         void draw() {
-            DrawTexture(imgText, 0, 0, WHITE);
+            DrawTexturePro(imgText, (Rectangle){0, 0, (float)img.width, (float)img.height}, (Rectangle){0, 0, (float)500, 500*aspect}, (Vector2){0, 0}, 0, WHITE);
         }
 };

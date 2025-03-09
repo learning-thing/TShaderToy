@@ -12,6 +12,7 @@ int main() {
     Shader ppfx = LoadShader(0, "shader/pp.fs");
 
     int iTimeLoc = GetShaderLocation(ppfx, "iTime");
+    int limiterLoc = GetShaderLocation(ppfx, "limiter");
     RenderTexture ppLayer = LoadRenderTexture(1080, 720);
     u_int8_t padding = 15;
     std::string imgPath = "";
@@ -23,6 +24,11 @@ int main() {
     while (!WindowShouldClose()) {
         iTime+=GetFrameTime();
         SetShaderValue(ppfx, iTimeLoc, &iTime, SHADER_UNIFORM_FLOAT);
+        if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
+            float mS = (float)GetMouseX()/(float)GetScreenWidth();
+            std::clog << mS << "\n";
+            SetShaderValue(ppfx, limiterLoc, &mS, SHADER_UNIFORM_FLOAT);
+        }
         //Actual drawing content
         BeginTextureMode(ppLayer);
             ClearBackground(BLACK);
@@ -31,11 +37,16 @@ int main() {
             si.draw();
         EndTextureMode();
         si.switchImage();
-        if (IsKeyPressed(KEY_R) || was_focused!=IsWindowFocused())  {
+        //if (IsKeyPressed(KEY_R) || was_focused!=IsWindowFocused())  {
+        if (IsKeyPressed(KEY_R))  {
+            std::clog << "Reloading shader" << "\n";
             ShaderToyManager::reloadShader(&ppfx);
             iTimeLoc = GetShaderLocation(ppfx, "iTime");
         }
-        was_focused = IsWindowFocused();
+        if (IsKeyPressed(KEY_SPACE)) {
+            TakeScreenshot("shader_screenshot.png");
+        }
+        //was_focused = IsWindowFocused();
         
 
         BeginDrawing();//present it to the scren
@@ -43,8 +54,8 @@ int main() {
             BeginShaderMode(ppfx);
                 DrawTextureRec(ppLayer.texture, (Rectangle){ 0, 0, (float)ppLayer.texture.width, (float)-ppLayer.texture.height }, (Vector2){ 0, 0 }, WHITE);
             EndShaderMode();
+            DrawFPS(10, 10);
         EndDrawing();
-    
     }
     UnloadShader(ppfx);
     UnloadRenderTexture(ppLayer);
